@@ -173,6 +173,7 @@ fun MiuixHomePage(
                         style = MiuixTheme.textStyles.subtitle,
                         color = MiuixTheme.colorScheme.onSurfaceVariantSummary
                     )
+                    Spacer(modifier = Modifier.size(12.dp))
                 }
             }
             if (state.hasUpdate) item {
