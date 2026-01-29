@@ -18,7 +18,7 @@ import java.util.Locale
 @Suppress("LogNotTimber")
 class FileLoggingTree(context: Context) : Timber.DebugTree() {
 
-    private val logDir: File = File(context.cacheDir, "logs")
+    private val logDir: File = File(context.cacheDir, LOG_DIR_NAME)
     private val backgroundHandler: Handler
     private var currentLogFile: File? = null
 
@@ -94,16 +94,17 @@ class FileLoggingTree(context: Context) : Timber.DebugTree() {
         } catch (e: Exception) {
             // Fail silently to avoid crashing the app during logging.
             // MUST use android.util.Log here, NOT Timber, to avoid infinite recursion.
-            Log.e("FileLoggingTree", "Error writing to log file", e)
+            Log.e(TAG, "Error writing to log file", e)
         }
     }
 
     /**
      * Ensures a valid log file exists for writing.
      * Creates a new file if:
-     * 1. No file exists.
-     * 2. The date has changed (new day).
-     * 3. The current file exceeds the size limit.
+     * 1. No directory exists.
+     * 2. No file exists.
+     * 3. The date has changed (new day).
+     * 4. The current file exceeds the size limit.
      */
     private fun ensureLogFileReady() {
         val now = Date()
@@ -112,15 +113,21 @@ class FileLoggingTree(context: Context) : Timber.DebugTree() {
 
         var needNewFile = false
 
-        // Case A: No file exists yet
+        // Case 1: No directory exists
+        if (!logDir.exists()) {
+            logDir.mkdirs()
+            needNewFile = true
+        }
+
+        // Case 2: No file exists yet
         if (file == null || !file.exists()) {
             needNewFile = true
         }
-        // Case B: Date changed (e.g., crossed midnight)
+        // Case 3: Date changed (e.g., crossed midnight)
         else if (todayStr != currentFileDateStr) {
             needNewFile = true
         }
-        // Case C: File is too large (exceeds limit)
+        // Case 4: File is too large (exceeds limit)
         else if (file.length() > MAX_FILE_SIZE) {
             needNewFile = true
         }
@@ -141,7 +148,7 @@ class FileLoggingTree(context: Context) : Timber.DebugTree() {
                 currentFileDateStr = todayStr
             }
         } catch (e: Exception) {
-            Log.e("FileLoggingTree", "Failed to create new log file", e)
+            Log.e(TAG, "Failed to create new log file", e)
         }
     }
 
@@ -161,7 +168,7 @@ class FileLoggingTree(context: Context) : Timber.DebugTree() {
                 }
             }
         } catch (e: Exception) {
-            Log.e("FileLoggingTree", "Failed to clean old logs", e)
+            Log.e(TAG, "Failed to clean old logs", e)
         }
     }
 
@@ -181,10 +188,14 @@ class FileLoggingTree(context: Context) : Timber.DebugTree() {
     }
 
     companion object {
+        private const val TAG = "FileLoggingTree"
+
         // Keep max 10 files (increased from 3 since files are now smaller due to rotation)
         private const val MAX_LOG_FILES = 10
 
         // Max file size: 2MB
         private const val MAX_FILE_SIZE = 2 * 1024 * 1024L
+
+        const val LOG_DIR_NAME = "logs"
     }
 }

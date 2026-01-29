@@ -2,6 +2,7 @@ package com.rosan.installer.ui.page.miuix.settings.preferred.subpage.home
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -18,6 +19,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalUriHandler
@@ -37,10 +39,16 @@ import com.rosan.installer.ui.page.miuix.widgets.ErrorDisplaySheet
 import com.rosan.installer.ui.page.miuix.widgets.MiuixBackButton
 import com.rosan.installer.ui.page.miuix.widgets.MiuixNavigationItemWidget
 import com.rosan.installer.ui.page.miuix.widgets.MiuixUpdateDialog
+import dev.chrisbanes.haze.HazeState
+import dev.chrisbanes.haze.HazeStyle
+import dev.chrisbanes.haze.HazeTint
+import dev.chrisbanes.haze.hazeEffect
+import dev.chrisbanes.haze.hazeSource
 import top.yukonga.miuix.kmp.basic.Card
 import top.yukonga.miuix.kmp.basic.InfiniteProgressIndicator
 import top.yukonga.miuix.kmp.basic.MiuixScrollBehavior
 import top.yukonga.miuix.kmp.basic.Scaffold
+import top.yukonga.miuix.kmp.basic.SmallTitle
 import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.basic.TopAppBar
 import top.yukonga.miuix.kmp.extra.SuperDialog
@@ -53,10 +61,14 @@ fun MiuixHomePage(
     navController: NavController,
     viewModel: PreferredViewModel
 ) {
-    val context = LocalContext.current
     val uriHandler = LocalUriHandler.current
     val state = viewModel.state
     val scrollBehavior = MiuixScrollBehavior()
+    val hazeState = remember { HazeState() }
+    val hazeStyle = HazeStyle(
+        backgroundColor = MiuixTheme.colorScheme.surface,
+        tint = HazeTint(MiuixTheme.colorScheme.surface.copy(0.8f))
+    )
     val showUpdateDialog = remember { mutableStateOf(false) }
 
     val internetAccessHint = if (RsConfig.isInternetAccessEnabled) stringResource(R.string.internet_access_enabled)
@@ -101,6 +113,12 @@ fun MiuixHomePage(
     Scaffold(
         topBar = {
             TopAppBar(
+                modifier = Modifier.hazeEffect(hazeState) {
+                    style = hazeStyle
+                    blurRadius = 30.dp
+                    noiseFactor = 0f
+                },
+                color = Color.Transparent,
                 title = stringResource(id = R.string.about),
                 scrollBehavior = scrollBehavior,
                 navigationIcon = {
@@ -114,39 +132,41 @@ fun MiuixHomePage(
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
-                .nestedScroll(scrollBehavior.nestedScrollConnection)
+                .hazeSource(hazeState)
                 .scrollEndHaptic()
                 .overScrollVertical()
+                .nestedScroll(scrollBehavior.nestedScrollConnection)
                 .padding(top = paddingValues.calculateTopPadding()),
-            horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             item { Spacer(modifier = Modifier.size(48.dp)) }
 
             item {
-                Image(
-                    modifier = Modifier.size(80.dp),
-                    painter = rememberDrawablePainter(
-                        drawable = ContextCompat.getDrawable(
-                            LocalContext.current,
-                            R.mipmap.ic_launcher
-                        )
-                    ),
-                    contentDescription = stringResource(id = R.string.app_name)
-                )
-            }
-            item {
-                Text(
-                    text = stringResource(id = R.string.app_name),
-                    style = MiuixTheme.textStyles.title2,
-                )
-            }
-            item {
-                Text(
-                    text = "$internetAccessHint$level ${RsConfig.VERSION_NAME} (${RsConfig.VERSION_CODE})",
-                    style = MiuixTheme.textStyles.subtitle,
-                    color = MiuixTheme.colorScheme.onSurfaceVariantSummary
-                )
+                Column(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    Image(
+                        modifier = Modifier.size(80.dp),
+                        painter = rememberDrawablePainter(
+                            drawable = ContextCompat.getDrawable(
+                                LocalContext.current,
+                                R.mipmap.ic_launcher
+                            )
+                        ),
+                        contentDescription = stringResource(id = R.string.app_name)
+                    )
+                    Text(
+                        text = stringResource(id = R.string.app_name),
+                        style = MiuixTheme.textStyles.title2,
+                    )
+                    Text(
+                        text = "$internetAccessHint$level ${RsConfig.VERSION_NAME} (${RsConfig.VERSION_CODE})",
+                        style = MiuixTheme.textStyles.subtitle,
+                        color = MiuixTheme.colorScheme.onSurfaceVariantSummary
+                    )
+                }
             }
             if (state.hasUpdate) item {
                 Text(
@@ -156,7 +176,7 @@ fun MiuixHomePage(
                 )
             }
             item { Spacer(modifier = Modifier.size(12.dp)) }
-
+            item { SmallTitle(stringResource(R.string.about)) }
             item {
                 Card(
                     modifier = Modifier

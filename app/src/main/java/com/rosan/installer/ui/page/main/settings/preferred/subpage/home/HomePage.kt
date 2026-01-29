@@ -32,6 +32,7 @@ import com.rosan.installer.ui.page.main.settings.preferred.PreferredViewModel
 import com.rosan.installer.ui.page.main.widget.card.StatusWidget
 import com.rosan.installer.ui.page.main.widget.setting.AppBackButton
 import com.rosan.installer.ui.page.main.widget.setting.BottomSheetContent
+import com.rosan.installer.ui.page.main.widget.setting.LabelWidget
 import com.rosan.installer.ui.page.main.widget.setting.SettingsAboutItemWidget
 import com.rosan.installer.ui.page.main.widget.setting.UpdateLoadingIndicator
 import dev.chrisbanes.haze.HazeState
@@ -79,6 +80,7 @@ fun HomePage(
                         StatusWidget(viewModel)
                     }
                 }
+                item { LabelWidget(stringResource(R.string.about)) }
                 item {
                     SettingsAboutItemWidget(
                         imageVector = AppIcons.ViewSourceCode,

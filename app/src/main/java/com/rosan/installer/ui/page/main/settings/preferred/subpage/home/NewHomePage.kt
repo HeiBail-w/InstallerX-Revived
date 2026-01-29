@@ -107,7 +107,9 @@ fun NewHomePage(
                     }
                 }
                 item {
-                    SplicedColumnGroup {
+                    SplicedColumnGroup(
+                        title = stringResource(R.string.about)
+                    ) {
                         item {
                             SettingsNavigationItemWidget(
                                 icon = AppIcons.ViewSourceCode,
