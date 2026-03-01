@@ -1,8 +1,11 @@
+// SPDX-License-Identifier: GPL-3.0-only
+// Copyright (C) 2025-2026 InstallerX Revived contributors
 package com.rosan.installer.util
 
 import android.annotation.SuppressLint
 import android.content.Context
 import android.content.pm.ApplicationInfo
+import android.provider.Settings
 import com.rosan.installer.data.reflect.repo.ReflectRepo
 import com.rosan.installer.data.reflect.repo.invokeStatic
 import org.koin.core.component.KoinComponent
@@ -45,6 +48,20 @@ object OSUtils : KoinComponent {
         return !osName.isNullOrEmpty() && osName.startsWith("OS")
     }
 
+    fun isSupportMiIsland(): Boolean {
+        return try {
+            val focusProtocolVersion = Settings.System.getInt(
+                context.contentResolver,
+                "notification_focus_protocol",
+                0
+            )
+            // Only support MI Island if the focus protocol version is 3
+            focusProtocolVersion == 3
+        } catch (_: Exception) {
+            false
+        }
+    }
+
     /**
      * Checks if the device is running MIUI.
      */
@@ -78,12 +95,11 @@ object OSUtils : KoinComponent {
     /**
      * Get a system property value using the ReflectRepo
      */
-    private fun getSystemProperty(key: String): String? {
-        return reflect.invokeStatic<String>(
+    private fun getSystemProperty(key: String): String? =
+        reflect.invokeStatic<String>(
             "get",
             systemPropertiesClass,
             arrayOf(String::class.java, String::class.java),
-            ""
+            key, ""
         )?.takeIf { it.isNotEmpty() }
-    }
 }
